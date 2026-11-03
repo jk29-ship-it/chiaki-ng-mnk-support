@@ -21,6 +21,10 @@ extern "C" {
 }
 
 #include <QByteArray>
+#include <QCursor>
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#endif
 #include <QPointer>
 #include <QColor>
 #include <QDebug>
@@ -2760,6 +2764,7 @@ void QmlMainWindow::grabInput()
     grab_input++;
     if (session)
         session->BlockInput(grab_input);
+    updateMouseStickCapture();
 }
 
 void QmlMainWindow::releaseInput()
@@ -2771,6 +2776,83 @@ void QmlMainWindow::releaseInput()
         setCursor(Qt::BlankCursor);
     if (session)
         session->BlockInput(grab_input);
+    updateMouseStickCapture();
+}
+
+void QmlMainWindow::updateMouseStickCapture()
+{
+    const bool want = session && session->MouseStickActive() && !grab_input && isActive();
+    if (want == mouse_stick_capture) {
+        if (want)
+            applyMouseStickClip();
+        return;
+    }
+    mouse_stick_capture = want;
+    if (want) {
+        setCursor(Qt::BlankCursor);
+#if defined(Q_OS_WIN)
+        // Raw input gives unaccelerated mouse counts, independent of the Windows pointer speed
+        RAWINPUTDEVICE rid = {};
+        rid.usUsagePage = 0x01; // generic desktop
+        rid.usUsage = 0x02; // mouse
+        rid.dwFlags = 0;
+        rid.hwndTarget = reinterpret_cast<HWND>(winId());
+        if (!RegisterRawInputDevices(&rid, 1, sizeof(rid)))
+            qCWarning(chiakiGui) << "Mouse aim: RegisterRawInputDevices failed" << GetLastError();
+#endif
+        applyMouseStickClip();
+        qCInfo(chiakiGui) << "Mouse aim: mouse captured";
+    } else {
+#if defined(Q_OS_WIN)
+        RAWINPUTDEVICE rid = {};
+        rid.usUsagePage = 0x01;
+        rid.usUsage = 0x02;
+        rid.dwFlags = RIDEV_REMOVE;
+        rid.hwndTarget = nullptr;
+        RegisterRawInputDevices(&rid, 1, sizeof(rid));
+        ClipCursor(nullptr);
+#endif
+        if (grab_input || !has_video || !settings->GetHideCursor())
+            setCursor(Qt::ArrowCursor);
+        qCInfo(chiakiGui) << "Mouse aim: mouse released";
+    }
+}
+
+void QmlMainWindow::applyMouseStickClip()
+{
+    if (!mouse_stick_capture)
+        return;
+#if defined(Q_OS_WIN)
+    // Keep the (hidden) cursor inside the stream window so clicks never reach other windows
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    RECT rect;
+    if (GetClientRect(hwnd, &rect)) {
+        POINT tl = { rect.left, rect.top };
+        POINT br = { rect.right, rect.bottom };
+        ClientToScreen(hwnd, &tl);
+        ClientToScreen(hwnd, &br);
+        RECT clip = { tl.x, tl.y, br.x, br.y };
+        ClipCursor(&clip);
+    }
+#else
+    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+#endif
+}
+
+bool QmlMainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+{
+#if defined(Q_OS_WIN)
+    MSG *msg = static_cast<MSG *>(message);
+    if (msg && msg->message == WM_INPUT && mouse_stick_capture && session) {
+        RAWINPUT raw = {};
+        UINT size = sizeof(raw);
+        if (GetRawInputData(reinterpret_cast<HRAWINPUT>(msg->lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER)) != static_cast<UINT>(-1)
+                && raw.header.dwType == RIM_TYPEMOUSE
+                && !(raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE))
+            session->HandleMouseStickDelta(raw.data.mouse.lLastX, raw.data.mouse.lLastY);
+    }
+#endif
+    return QWindow::nativeEvent(eventType, message, result);
 }
 
 void QmlMainWindow::requestOverlayUpdate()
@@ -5158,6 +5240,7 @@ renderer_backend_ready:
 
     backend = new QmlBackend(settings, this);
     stats_overlay_widget = new StatsOverlayWidget(this, backend);
+    connect(this, &QWindow::activeChanged, this, &QmlMainWindow::updateMouseStickCapture);
     connect(backend, &QmlBackend::sessionChanged, this, [this, exit_app_on_stream_exit](StreamSession *s) {
         const bool preserve_startup_warmup = s && startup_warmup_preserve_next_session_change;
         startup_warmup_preserve_next_session_change = false;
@@ -5165,8 +5248,11 @@ renderer_backend_ready:
         stream_session_active.storeRelease(s ? 1 : 0);
         startup_video_visible_generation.fetchAndAddRelaxed(1);
         grab_input = 0;
-        if (session)
+        if (session) {
             session->BlockInput(0);
+            connect(session, &StreamSession::MouseStickActiveChanged, this, &QmlMainWindow::updateMouseStickCapture);
+        }
+        updateMouseStickCapture();
         // Only drain at session end (teardown): prevents frame_mix use-after-free.
         // At session start draining would visibly freeze the connecting UI, so the
         // queue reset below waits only for a render that is drawing queued frames.
@@ -7657,6 +7743,12 @@ bool QmlMainWindow::handleShortcut(QKeyEvent *event)
             else
                 normalTime();
             return true;
+        case Qt::Key_F8:
+            if (session && session->MouseStickEnabled()) {
+                session->ToggleMouseStick();
+                return true;
+            }
+            break;
         default:
             break;
         }
@@ -7710,6 +7802,18 @@ bool QmlMainWindow::event(QEvent *event)
         if (static_cast<QMouseEvent*>(event)->source() != Qt::MouseEventNotSynthesized)
             return true;
         if (session && !grab_input) {
+            if (event->type() == QEvent::MouseMove && mouse_stick_capture) {
+#if !defined(Q_OS_WIN)
+                // No raw input here: measure the offset from the window center and warp back
+                const QPointF center(width() / 2.0, height() / 2.0);
+                const QPointF delta = static_cast<QMouseEvent*>(event)->position() - center;
+                if (!delta.isNull()) {
+                    session->HandleMouseStickDelta(delta.x(), delta.y());
+                    QCursor::setPos(mapToGlobal(center.toPoint()));
+                }
+#endif
+                return true;
+            }
             if (event->type() == QEvent::MouseMove)
                 session->HandleMouseMoveEvent(static_cast<QMouseEvent*>(event), width(), height());
             else if (event->type() == QEvent::MouseButtonPress)
@@ -7721,6 +7825,11 @@ bool QmlMainWindow::event(QEvent *event)
         QGuiApplication::sendEvent(quick_window, event);
         break;
     case QEvent::MouseButtonDblClick:
+        // in mouse aim mode the second click of a fast double click is a normal press (e.g. shooting)
+        if (session && !grab_input && session->MouseStickActive()) {
+            session->HandleMousePressEvent(static_cast<QMouseEvent*>(event));
+            return true;
+        }
         if(!settings->GetFullscreenDoubleClickEnabled())
             break;
         if (session && !grab_input) {
@@ -7781,7 +7890,13 @@ bool QmlMainWindow::event(QEvent *event)
             else
                 QMetaObject::invokeMethod(quick_render, std::bind(&QmlMainWindow::destroySwapchain, this), Qt::BlockingQueuedConnection);
         break;
+    case QEvent::FocusIn:
+    case QEvent::FocusOut:
+    case QEvent::WindowStateChange:
+        updateMouseStickCapture();
+        break;
     case QEvent::Move:
+        applyMouseStickClip();
         if(!session && isWindowAdjustable())
             settings->SetGeometry(geometry());
         else if(session && settings->GetWindowType() == WindowType::AdjustableResolution && isStreamWindowAdjustable())
@@ -7789,6 +7904,7 @@ bool QmlMainWindow::event(QEvent *event)
         updateStatsOverlayGeometry();
         break;
     case QEvent::Resize:
+        applyMouseStickClip();
         if(!session && isWindowAdjustable())
             settings->SetGeometry(geometry());
         else if(session && settings->GetWindowType() == WindowType::AdjustableResolution && isStreamWindowAdjustable())

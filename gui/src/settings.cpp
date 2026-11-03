@@ -996,6 +996,39 @@ void Settings::SetMouseTouchEnabled(bool enabled)
 	settings.setValue("settings/mouse_touch_enabled", enabled);
 }
 
+bool Settings::GetMouseStickEnabled() const
+{
+	return settings.value("settings/mouse_stick_enabled", false).toBool();
+}
+
+void Settings::SetMouseStickEnabled(bool enabled)
+{
+	settings.setValue("settings/mouse_stick_enabled", enabled);
+}
+
+MouseStickConfig Settings::GetMouseStickConfig() const
+{
+	MouseStickConfig defaults;
+	MouseStickConfig config;
+	config.sensitivity = settings.value("settings/mouse_stick_sensitivity", defaults.sensitivity).toDouble();
+	config.y_ratio = settings.value("settings/mouse_stick_y_ratio", defaults.y_ratio).toDouble();
+	config.deadzone = settings.value("settings/mouse_stick_deadzone", defaults.deadzone).toDouble();
+	config.exponent = settings.value("settings/mouse_stick_exponent", defaults.exponent).toDouble();
+	config.smoothing = settings.value("settings/mouse_stick_smoothing", defaults.smoothing).toDouble();
+	config.invert_y = settings.value("settings/mouse_stick_invert_y", defaults.invert_y).toBool();
+	return config;
+}
+
+void Settings::SetMouseStickConfig(const MouseStickConfig &config)
+{
+	settings.setValue("settings/mouse_stick_sensitivity", config.sensitivity);
+	settings.setValue("settings/mouse_stick_y_ratio", config.y_ratio);
+	settings.setValue("settings/mouse_stick_deadzone", config.deadzone);
+	settings.setValue("settings/mouse_stick_exponent", config.exponent);
+	settings.setValue("settings/mouse_stick_smoothing", config.smoothing);
+	settings.setValue("settings/mouse_stick_invert_y", config.invert_y);
+}
+
 
 bool Settings::GetDpadTouchEnabled() const
 {

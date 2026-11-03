@@ -80,6 +80,13 @@ class QmlSettings : public QObject
     Q_PROPERTY(QString psnAuthToken READ psnAuthToken WRITE setPsnAuthToken NOTIFY psnAuthTokenChanged)
     Q_PROPERTY(QString psnAuthTokenExpiry READ psnAuthTokenExpiry WRITE setPsnAuthTokenExpiry NOTIFY psnAuthTokenExpiryChanged)
     Q_PROPERTY(QString psnAccountId READ psnAccountId WRITE setPsnAccountId NOTIFY psnAccountIdChanged)
+    Q_PROPERTY(bool mouseStickEnabled READ mouseStickEnabled WRITE setMouseStickEnabled NOTIFY mouseStickChanged)
+    Q_PROPERTY(double mouseStickSensitivity READ mouseStickSensitivity WRITE setMouseStickSensitivity NOTIFY mouseStickChanged)
+    Q_PROPERTY(double mouseStickYRatio READ mouseStickYRatio WRITE setMouseStickYRatio NOTIFY mouseStickChanged)
+    Q_PROPERTY(double mouseStickDeadzone READ mouseStickDeadzone WRITE setMouseStickDeadzone NOTIFY mouseStickChanged)
+    Q_PROPERTY(double mouseStickExponent READ mouseStickExponent WRITE setMouseStickExponent NOTIFY mouseStickChanged)
+    Q_PROPERTY(double mouseStickSmoothing READ mouseStickSmoothing WRITE setMouseStickSmoothing NOTIFY mouseStickChanged)
+    Q_PROPERTY(bool mouseStickInvertY READ mouseStickInvertY WRITE setMouseStickInvertY NOTIFY mouseStickChanged)
     Q_PROPERTY(bool mouseTouchEnabled READ mouseTouchEnabled WRITE setMouseTouchEnabled NOTIFY mouseTouchEnabledChanged)
     Q_PROPERTY(bool keyboardEnabled READ keyboardEnabled WRITE setKeyboardEnabled NOTIFY keyboardEnabledChanged)
     Q_PROPERTY(bool dpadTouchEnabled READ dpadTouchEnabled WRITE setDpadTouchEnabled NOTIFY dpadTouchEnabledChanged)
@@ -544,6 +551,27 @@ public:
     QString psnAccountId() const;
     void setPsnAccountId(const QString &account_id);
 
+    bool mouseStickEnabled() const;
+    void setMouseStickEnabled(bool enabled);
+
+    double mouseStickSensitivity() const;
+    void setMouseStickSensitivity(double value);
+
+    double mouseStickYRatio() const;
+    void setMouseStickYRatio(double value);
+
+    double mouseStickDeadzone() const;
+    void setMouseStickDeadzone(double value);
+
+    double mouseStickExponent() const;
+    void setMouseStickExponent(double value);
+
+    double mouseStickSmoothing() const;
+    void setMouseStickSmoothing(double value);
+
+    bool mouseStickInvertY() const;
+    void setMouseStickInvertY(bool value);
+
     bool mouseTouchEnabled() const;
     void setMouseTouchEnabled(bool enabled);
 
@@ -681,6 +709,7 @@ signals:
     void psnAuthTokenExpiryChanged();
     void psnAccountIdChanged();
     void mouseTouchEnabledChanged();
+    void mouseStickChanged();
     void keyboardEnabledChanged();
     void dpadTouchEnabledChanged();
     void dpadTouchIncrementChanged();

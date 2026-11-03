@@ -6,6 +6,7 @@
 #include <chiaki/session.h>
 
 #include "host.h"
+#include "mousestick.h"
 
 #include <QSettings>
 #include <QList>
@@ -442,6 +443,12 @@ class Settings : public QObject
 
 		bool GetMouseTouchEnabled() const;
 		void SetMouseTouchEnabled(bool enabled);
+
+		bool GetMouseStickEnabled() const;
+		void SetMouseStickEnabled(bool enabled);
+
+		MouseStickConfig GetMouseStickConfig() const;
+		void SetMouseStickConfig(const MouseStickConfig &config);
 
 		bool GetDpadTouchEnabled() const;
 		void SetDpadTouchEnabled(bool enabled);

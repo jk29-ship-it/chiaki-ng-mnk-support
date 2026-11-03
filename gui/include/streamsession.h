@@ -31,6 +31,7 @@
 #include "sessionlog.h"
 #include "controllermanager.h"
 #include "settings.h"
+#include "mousestick.h"
 
 #include <QObject>
 #include <QImage>
@@ -95,6 +96,8 @@ class SdeckHapticsWorker;
 		bool enable_keyboard;
 		bool keyboard_controller_enabled;
 		bool mouse_touch_enabled;
+		bool mouse_stick_enabled;
+		MouseStickConfig mouse_stick_config;
 		bool enable_dualsense;
 		bool auto_regist;
 		float haptic_override;
@@ -229,6 +232,14 @@ class StreamSession : public QObject
 		float haptic_override;
 		bool keyboard_controller_enabled;
 		bool mouse_touch_enabled;
+		bool mouse_stick_enabled;
+		bool mouse_stick_active;
+		MouseStick mouse_stick;
+		ChiakiControllerState mouse_stick_state;
+		QTimer *mouse_stick_timer;
+		QElapsedTimer mouse_stick_clock;
+		void MouseStickTick();
+		void SetMouseStickButton(Qt::MouseButton button, bool pressed);
 		bool dpad_regular;
 		bool dpad_regular_touch_switched;
 		uint dpad_touch_shortcut1;
@@ -371,6 +382,12 @@ class StreamSession : public QObject
 		void HandleMouseReleaseEvent(QMouseEvent *event);
 		void HandleMousePressEvent(QMouseEvent *event);
 		void HandleMouseMoveEvent(QMouseEvent *event, qreal width, qreal height);
+		/** Mouse aim: mouse movement drives the right stick */
+		bool MouseStickEnabled() const { return mouse_stick_enabled; }
+		bool MouseStickActive() const { return mouse_stick_enabled && mouse_stick_active; }
+		void SetMouseStickActive(bool active);
+		void ToggleMouseStick() { SetMouseStickActive(!mouse_stick_active); }
+		void HandleMouseStickDelta(double dx, double dy);
 #if CHIAKI_GUI_ENABLE_SPEEX
 		bool ProcessMicFrame(int16_t *echo_buf);
 #endif
@@ -397,6 +414,7 @@ class StreamSession : public QObject
 		void AveragePacketLossChanged();
 		void FramesLostChanged();
 		void MutedChanged();
+		void MouseStickActiveChanged();
 		void CantDisplayChanged(bool cant_display);
 		void FecFailure();
 

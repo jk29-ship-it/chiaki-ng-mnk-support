@@ -2408,6 +2408,110 @@ DialogView {
                                 }
                             }
                         }
+                        C.CheckBox {
+                            text: qsTr("Mouse aim (mouse moves right stick, F8 toggles)")
+                            checked: Chiaki.settings.mouseStickEnabled
+                            onToggled: Chiaki.settings.mouseStickEnabled = checked
+                            Layout.alignment: Qt.AlignRight
+                            Layout.columnSpan: 2
+                        }
+                        C.CheckBox {
+                            text: qsTr("Invert mouse Y")
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            checked: Chiaki.settings.mouseStickInvertY
+                            onToggled: Chiaki.settings.mouseStickInvertY = checked
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Sensitivity: %1").arg(Chiaki.settings.mouseStickSensitivity.toFixed(2))
+                            }
+                            C.Slider {
+                                Layout.preferredWidth: 170
+                                from: 0.05
+                                to: 3.0
+                                stepSize: 0.05
+                                value: Chiaki.settings.mouseStickSensitivity
+                                onMoved: Chiaki.settings.mouseStickSensitivity = value
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Vertical ratio: %1").arg(Chiaki.settings.mouseStickYRatio.toFixed(2))
+                            }
+                            C.Slider {
+                                Layout.preferredWidth: 170
+                                from: 0.25
+                                to: 2.0
+                                stepSize: 0.05
+                                value: Chiaki.settings.mouseStickYRatio
+                                onMoved: Chiaki.settings.mouseStickYRatio = value
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Deadzone jump: %1").arg(Chiaki.settings.mouseStickDeadzone.toFixed(2))
+                            }
+                            C.Slider {
+                                Layout.preferredWidth: 170
+                                from: 0.0
+                                to: 0.5
+                                stepSize: 0.01
+                                value: Chiaki.settings.mouseStickDeadzone
+                                onMoved: Chiaki.settings.mouseStickDeadzone = value
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Curve exponent: %1").arg(Chiaki.settings.mouseStickExponent.toFixed(2))
+                            }
+                            C.Slider {
+                                Layout.preferredWidth: 170
+                                from: 0.4
+                                to: 2.0
+                                stepSize: 0.05
+                                value: Chiaki.settings.mouseStickExponent
+                                onMoved: Chiaki.settings.mouseStickExponent = value
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Smoothing: %1").arg(Chiaki.settings.mouseStickSmoothing.toFixed(2))
+                            }
+                            C.Slider {
+                                Layout.preferredWidth: 170
+                                from: 0.0
+                                to: 0.9
+                                stepSize: 0.05
+                                value: Chiaki.settings.mouseStickSmoothing
+                                onMoved: Chiaki.settings.mouseStickSmoothing = value
+                            }
+                        }
+                        Label {
+                            text: qsTr("Mouse buttons: left R2, right L2, middle R3, back L1, forward R1")
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            wrapMode: Text.WordWrap
+                            Layout.preferredWidth: 340
+                        }
                         Repeater {
                             id: chiakiKeys
                             model: Chiaki.settings.controllerMapping

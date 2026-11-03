@@ -798,6 +798,95 @@ void QmlSettings::setPsnAccountId(const QString &account_id)
     emit psnAccountIdChanged();
 }
 
+bool QmlSettings::mouseStickEnabled() const
+{
+    return settings->GetMouseStickEnabled();
+}
+
+void QmlSettings::setMouseStickEnabled(bool enabled)
+{
+    settings->SetMouseStickEnabled(enabled);
+    emit mouseStickChanged();
+}
+
+double QmlSettings::mouseStickSensitivity() const
+{
+    return settings->GetMouseStickConfig().sensitivity;
+}
+
+void QmlSettings::setMouseStickSensitivity(double value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.sensitivity = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
+double QmlSettings::mouseStickYRatio() const
+{
+    return settings->GetMouseStickConfig().y_ratio;
+}
+
+void QmlSettings::setMouseStickYRatio(double value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.y_ratio = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
+double QmlSettings::mouseStickDeadzone() const
+{
+    return settings->GetMouseStickConfig().deadzone;
+}
+
+void QmlSettings::setMouseStickDeadzone(double value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.deadzone = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
+double QmlSettings::mouseStickExponent() const
+{
+    return settings->GetMouseStickConfig().exponent;
+}
+
+void QmlSettings::setMouseStickExponent(double value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.exponent = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
+double QmlSettings::mouseStickSmoothing() const
+{
+    return settings->GetMouseStickConfig().smoothing;
+}
+
+void QmlSettings::setMouseStickSmoothing(double value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.smoothing = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
+bool QmlSettings::mouseStickInvertY() const
+{
+    return settings->GetMouseStickConfig().invert_y;
+}
+
+void QmlSettings::setMouseStickInvertY(bool value)
+{
+    MouseStickConfig config = settings->GetMouseStickConfig();
+    config.invert_y = value;
+    settings->SetMouseStickConfig(config);
+    emit mouseStickChanged();
+}
+
 bool QmlSettings::mouseTouchEnabled() const
 {
     return settings->GetMouseTouchEnabled();
@@ -1947,6 +2036,7 @@ void QmlSettings::refreshAllKeys()
     emit psnAuthTokenExpiryChanged();
     emit psnAccountIdChanged();
     emit mouseTouchEnabledChanged();
+    emit mouseStickChanged();
     emit keyboardEnabledChanged();
     emit dpadTouchEnabledChanged();
     emit iDROnFECFailureEnabledChanged();
