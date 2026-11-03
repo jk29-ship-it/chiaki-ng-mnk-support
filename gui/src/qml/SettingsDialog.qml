@@ -2506,12 +2506,92 @@ DialogView {
                                 onMoved: Chiaki.settings.mouseStickSmoothing = value
                             }
                         }
-                        Label {
-                            text: qsTr("Mouse buttons: left R2, right L2, middle R3, back L1, forward R1")
+                        RowLayout {
+                            spacing: 10
                             enabled: Chiaki.settings.mouseStickEnabled
-                            wrapMode: Text.WordWrap
-                            Layout.preferredWidth: 340
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Left mouse button")
+                            }
+                            C.ComboBox {
+                                Layout.preferredWidth: 170
+                                model: [{ text: qsTr("None"), value: 0 }, { text: "R2", value: 131072 }, { text: "L2", value: 65536 }, { text: "R1", value: 512 }, { text: "L1", value: 256 }, { text: "R3", value: 2048 }, { text: "L3", value: 1024 }, { text: qsTr("Cross"), value: 1 }, { text: qsTr("Circle"), value: 2 }, { text: qsTr("Square"), value: 4 }, { text: qsTr("Triangle"), value: 8 }, { text: qsTr("D-pad Left"), value: 16 }, { text: qsTr("D-pad Right"), value: 32 }, { text: qsTr("D-pad Up"), value: 64 }, { text: qsTr("D-pad Down"), value: 128 }, { text: qsTr("Options"), value: 4096 }, { text: qsTr("Share"), value: 8192 }, { text: qsTr("Touchpad"), value: 16384 }, { text: "PS", value: 32768 }]
+                                textRole: "text"
+                                valueRole: "value"
+                                Component.onCompleted: currentIndex = indexOfValue(Chiaki.settings.mouseStickButton(0))
+                                onActivated: Chiaki.settings.setMouseStickButton(0, currentValue)
+                            }
                         }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Right mouse button")
+                            }
+                            C.ComboBox {
+                                Layout.preferredWidth: 170
+                                model: [{ text: qsTr("None"), value: 0 }, { text: "R2", value: 131072 }, { text: "L2", value: 65536 }, { text: "R1", value: 512 }, { text: "L1", value: 256 }, { text: "R3", value: 2048 }, { text: "L3", value: 1024 }, { text: qsTr("Cross"), value: 1 }, { text: qsTr("Circle"), value: 2 }, { text: qsTr("Square"), value: 4 }, { text: qsTr("Triangle"), value: 8 }, { text: qsTr("D-pad Left"), value: 16 }, { text: qsTr("D-pad Right"), value: 32 }, { text: qsTr("D-pad Up"), value: 64 }, { text: qsTr("D-pad Down"), value: 128 }, { text: qsTr("Options"), value: 4096 }, { text: qsTr("Share"), value: 8192 }, { text: qsTr("Touchpad"), value: 16384 }, { text: "PS", value: 32768 }]
+                                textRole: "text"
+                                valueRole: "value"
+                                Component.onCompleted: currentIndex = indexOfValue(Chiaki.settings.mouseStickButton(1))
+                                onActivated: Chiaki.settings.setMouseStickButton(1, currentValue)
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Middle mouse button")
+                            }
+                            C.ComboBox {
+                                Layout.preferredWidth: 170
+                                model: [{ text: qsTr("None"), value: 0 }, { text: "R2", value: 131072 }, { text: "L2", value: 65536 }, { text: "R1", value: 512 }, { text: "L1", value: 256 }, { text: "R3", value: 2048 }, { text: "L3", value: 1024 }, { text: qsTr("Cross"), value: 1 }, { text: qsTr("Circle"), value: 2 }, { text: qsTr("Square"), value: 4 }, { text: qsTr("Triangle"), value: 8 }, { text: qsTr("D-pad Left"), value: 16 }, { text: qsTr("D-pad Right"), value: 32 }, { text: qsTr("D-pad Up"), value: 64 }, { text: qsTr("D-pad Down"), value: 128 }, { text: qsTr("Options"), value: 4096 }, { text: qsTr("Share"), value: 8192 }, { text: qsTr("Touchpad"), value: 16384 }, { text: "PS", value: 32768 }]
+                                textRole: "text"
+                                valueRole: "value"
+                                Component.onCompleted: currentIndex = indexOfValue(Chiaki.settings.mouseStickButton(2))
+                                onActivated: Chiaki.settings.setMouseStickButton(2, currentValue)
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Back side button")
+                            }
+                            C.ComboBox {
+                                Layout.preferredWidth: 170
+                                model: [{ text: qsTr("None"), value: 0 }, { text: "R2", value: 131072 }, { text: "L2", value: 65536 }, { text: "R1", value: 512 }, { text: "L1", value: 256 }, { text: "R3", value: 2048 }, { text: "L3", value: 1024 }, { text: qsTr("Cross"), value: 1 }, { text: qsTr("Circle"), value: 2 }, { text: qsTr("Square"), value: 4 }, { text: qsTr("Triangle"), value: 8 }, { text: qsTr("D-pad Left"), value: 16 }, { text: qsTr("D-pad Right"), value: 32 }, { text: qsTr("D-pad Up"), value: 64 }, { text: qsTr("D-pad Down"), value: 128 }, { text: qsTr("Options"), value: 4096 }, { text: qsTr("Share"), value: 8192 }, { text: qsTr("Touchpad"), value: 16384 }, { text: "PS", value: 32768 }]
+                                textRole: "text"
+                                valueRole: "value"
+                                Component.onCompleted: currentIndex = indexOfValue(Chiaki.settings.mouseStickButton(3))
+                                onActivated: Chiaki.settings.setMouseStickButton(3, currentValue)
+                            }
+                        }
+                        RowLayout {
+                            spacing: 10
+                            enabled: Chiaki.settings.mouseStickEnabled
+                            Label {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: Text.AlignRight
+                                text: qsTr("Forward side button")
+                            }
+                            C.ComboBox {
+                                Layout.preferredWidth: 170
+                                model: [{ text: qsTr("None"), value: 0 }, { text: "R2", value: 131072 }, { text: "L2", value: 65536 }, { text: "R1", value: 512 }, { text: "L1", value: 256 }, { text: "R3", value: 2048 }, { text: "L3", value: 1024 }, { text: qsTr("Cross"), value: 1 }, { text: qsTr("Circle"), value: 2 }, { text: qsTr("Square"), value: 4 }, { text: qsTr("Triangle"), value: 8 }, { text: qsTr("D-pad Left"), value: 16 }, { text: qsTr("D-pad Right"), value: 32 }, { text: qsTr("D-pad Up"), value: 64 }, { text: qsTr("D-pad Down"), value: 128 }, { text: qsTr("Options"), value: 4096 }, { text: qsTr("Share"), value: 8192 }, { text: qsTr("Touchpad"), value: 16384 }, { text: "PS", value: 32768 }]
+                                textRole: "text"
+                                valueRole: "value"
+                                Component.onCompleted: currentIndex = indexOfValue(Chiaki.settings.mouseStickButton(4))
+                                onActivated: Chiaki.settings.setMouseStickButton(4, currentValue)
+                            }
+                        }
+                        Item { Layout.fillWidth: true }
                         Repeater {
                             id: chiakiKeys
                             model: Chiaki.settings.controllerMapping

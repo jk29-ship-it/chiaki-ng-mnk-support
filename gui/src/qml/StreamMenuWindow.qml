@@ -142,6 +142,35 @@ Window {
             }
 
             ToolSeparator {
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.leftMargin: -10
+                Layout.rightMargin: 10
+            }
+
+            Slider {
+                id: mouseSensSlider
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.rightMargin: 20
+                orientation: Qt.Vertical
+                from: 0.05
+                to: 3.0
+                Layout.preferredHeight: 100
+                padding: 10
+                stepSize: 0.05
+                value: Chiaki.settings.mouseStickSensitivity
+                onMoved: Chiaki.settings.mouseStickSensitivity = value
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+
+                Label {
+                    anchors {
+                        top: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: qsTr("Mouse %1").arg(parent.value.toFixed(2))
+                }
+            }
+
+            ToolSeparator {
                 Layout.leftMargin: -10
                 Layout.rightMargin: -10
             }

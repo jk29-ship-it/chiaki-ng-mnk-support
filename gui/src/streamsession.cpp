@@ -468,6 +468,11 @@ StreamSession::StreamSession(const StreamSessionConnectInfo &connect_info, QObje
 	mouse_stick_enabled = connect_info.mouse_stick_enabled;
 	mouse_stick_active = mouse_stick_enabled;
 	mouse_stick.SetConfig(connect_info.mouse_stick_config);
+	LoadMouseStickSettings(connect_info.settings);
+	// slider and button changes take effect immediately, also during a running stream
+	connect(connect_info.settings, &Settings::MouseStickSettingsUpdated, this, [this, settings = connect_info.settings]() {
+		LoadMouseStickSettings(settings);
+	});
 	keyboard_controller_enabled = connect_info.keyboard_controller_enabled;
 	host = connect_info.host;
 	QByteArray host_str = connect_info.host.toUtf8();
@@ -915,6 +920,17 @@ void StreamSession::GoHome()
 	chiaki_session_go_home(&session);
 }
 
+void StreamSession::LoadMouseStickSettings(Settings *settings)
+{
+	mouse_stick.SetConfig(settings->GetMouseStickConfig());
+	for(int i = 0; i < MOUSE_STICK_BUTTON_COUNT; i++)
+		mouse_stick_buttons[i] = settings->GetMouseStickButton(i);
+	// drop held mouse buttons so a remap never leaves a button stuck
+	mouse_stick_state.buttons = 0;
+	mouse_stick_state.l2_state = 0;
+	mouse_stick_state.r2_state = 0;
+}
+
 void StreamSession::SetMouseStickActive(bool active)
 {
 	if(!mouse_stick_enabled || active == mouse_stick_active)
@@ -956,36 +972,30 @@ void StreamSession::MouseStickTick()
 
 void StreamSession::SetMouseStickButton(Qt::MouseButton button, bool pressed)
 {
-	// Shooter layout: left = R2 (shoot), right = L2 (aim), middle = R3, back = L1, forward = R1
+	int index;
 	switch(button)
 	{
-		case Qt::LeftButton:
-			mouse_stick_state.r2_state = pressed ? 0xff : 0;
-			break;
-		case Qt::RightButton:
-			mouse_stick_state.l2_state = pressed ? 0xff : 0;
-			break;
-		case Qt::MiddleButton:
-			if(pressed)
-				mouse_stick_state.buttons |= CHIAKI_CONTROLLER_BUTTON_R3;
-			else
-				mouse_stick_state.buttons &= ~CHIAKI_CONTROLLER_BUTTON_R3;
-			break;
-		case Qt::BackButton:
-			if(pressed)
-				mouse_stick_state.buttons |= CHIAKI_CONTROLLER_BUTTON_L1;
-			else
-				mouse_stick_state.buttons &= ~CHIAKI_CONTROLLER_BUTTON_L1;
-			break;
-		case Qt::ForwardButton:
-			if(pressed)
-				mouse_stick_state.buttons |= CHIAKI_CONTROLLER_BUTTON_R1;
-			else
-				mouse_stick_state.buttons &= ~CHIAKI_CONTROLLER_BUTTON_R1;
-			break;
-		default:
-			return;
+		case Qt::LeftButton: index = 0; break;
+		case Qt::RightButton: index = 1; break;
+		case Qt::MiddleButton: index = 2; break;
+		case Qt::BackButton: index = 3; break;
+		case Qt::ForwardButton: index = 4; break;
+		default: return;
 	}
+	int target = mouse_stick_buttons[index];
+	if(target == CHIAKI_CONTROLLER_ANALOG_BUTTON_R2)
+		mouse_stick_state.r2_state = pressed ? 0xff : 0;
+	else if(target == CHIAKI_CONTROLLER_ANALOG_BUTTON_L2)
+		mouse_stick_state.l2_state = pressed ? 0xff : 0;
+	else if(target > 0 && target < (1 << CHIAKI_CONTROLLER_BUTTONS_COUNT))
+	{
+		if(pressed)
+			mouse_stick_state.buttons |= target;
+		else
+			mouse_stick_state.buttons &= ~target;
+	}
+	else
+		return;
 	SendFeedbackState();
 }
 

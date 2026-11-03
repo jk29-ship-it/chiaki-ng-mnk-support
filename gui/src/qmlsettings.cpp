@@ -798,6 +798,17 @@ void QmlSettings::setPsnAccountId(const QString &account_id)
     emit psnAccountIdChanged();
 }
 
+int QmlSettings::mouseStickButton(int index) const
+{
+    return settings->GetMouseStickButton(index);
+}
+
+void QmlSettings::setMouseStickButton(int index, int button)
+{
+    settings->SetMouseStickButton(index, button);
+    emit mouseStickChanged();
+}
+
 bool QmlSettings::mouseStickEnabled() const
 {
     return settings->GetMouseStickEnabled();

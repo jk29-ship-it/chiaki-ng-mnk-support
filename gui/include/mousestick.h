@@ -5,6 +5,9 @@
 
 #include <cstdint>
 
+// mouse buttons that can be bound in mouse aim mode: left, right, middle, back, forward
+#define MOUSE_STICK_BUTTON_COUNT 5
+
 /**
  * Converts relative mouse movement into a right analog stick deflection.
  *

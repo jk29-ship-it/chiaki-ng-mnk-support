@@ -1027,6 +1027,31 @@ void Settings::SetMouseStickConfig(const MouseStickConfig &config)
 	settings.setValue("settings/mouse_stick_exponent", config.exponent);
 	settings.setValue("settings/mouse_stick_smoothing", config.smoothing);
 	settings.setValue("settings/mouse_stick_invert_y", config.invert_y);
+	emit MouseStickSettingsUpdated();
+}
+
+static const char *mouse_stick_button_keys[] = { "left", "right", "middle", "back", "forward" };
+
+int Settings::GetMouseStickButton(int index) const
+{
+	static const int defaults[] = {
+		CHIAKI_CONTROLLER_ANALOG_BUTTON_R2,
+		CHIAKI_CONTROLLER_ANALOG_BUTTON_L2,
+		CHIAKI_CONTROLLER_BUTTON_R3,
+		CHIAKI_CONTROLLER_BUTTON_L1,
+		CHIAKI_CONTROLLER_BUTTON_R1
+	};
+	if(index < 0 || index >= MOUSE_STICK_BUTTON_COUNT)
+		return 0;
+	return settings.value(QStringLiteral("settings/mouse_stick_button_%1").arg(mouse_stick_button_keys[index]), defaults[index]).toInt();
+}
+
+void Settings::SetMouseStickButton(int index, int button)
+{
+	if(index < 0 || index >= MOUSE_STICK_BUTTON_COUNT)
+		return;
+	settings.setValue(QStringLiteral("settings/mouse_stick_button_%1").arg(mouse_stick_button_keys[index]), button);
+	emit MouseStickSettingsUpdated();
 }
 
 

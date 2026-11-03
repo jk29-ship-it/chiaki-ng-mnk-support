@@ -551,6 +551,9 @@ public:
     QString psnAccountId() const;
     void setPsnAccountId(const QString &account_id);
 
+    Q_INVOKABLE int mouseStickButton(int index) const;
+    Q_INVOKABLE void setMouseStickButton(int index, int button);
+
     bool mouseStickEnabled() const;
     void setMouseStickEnabled(bool enabled);
 

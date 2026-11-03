@@ -238,6 +238,8 @@ class StreamSession : public QObject
 		ChiakiControllerState mouse_stick_state;
 		QTimer *mouse_stick_timer;
 		QElapsedTimer mouse_stick_clock;
+		int mouse_stick_buttons[MOUSE_STICK_BUTTON_COUNT];
+		void LoadMouseStickSettings(Settings *settings);
 		void MouseStickTick();
 		void SetMouseStickButton(Qt::MouseButton button, bool pressed);
 		bool dpad_regular;

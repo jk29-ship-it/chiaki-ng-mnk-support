@@ -450,6 +450,11 @@ class Settings : public QObject
 		MouseStickConfig GetMouseStickConfig() const;
 		void SetMouseStickConfig(const MouseStickConfig &config);
 
+		/** Mouse aim button targets, index 0..4 = left, right, middle, back, forward.
+		 *  Value is a ChiakiControllerButton or ChiakiControllerAnalogButton, 0 = unbound */
+		int GetMouseStickButton(int index) const;
+		void SetMouseStickButton(int index, int button);
+
 		bool GetDpadTouchEnabled() const;
 		void SetDpadTouchEnabled(bool enabled);
 
@@ -751,6 +756,7 @@ class Settings : public QObject
 		void CurrentProfileChanged();
 		void ProfilesUpdated();
 		void PlaceboSettingsUpdated();
+		void MouseStickSettingsUpdated();
 };
 
 #endif // CHIAKI_SETTINGS_H
