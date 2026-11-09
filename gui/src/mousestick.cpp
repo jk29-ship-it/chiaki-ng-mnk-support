@@ -7,6 +7,8 @@
 
 // Below this stick magnitude the output snaps back to center.
 static const double MOUSE_STICK_EPSILON = 1e-4;
+// Time step the smoothing factor refers to, in seconds.
+static const double MOUSE_STICK_SMOOTHING_STEP = 0.004;
 
 MouseStick::MouseStick(const MouseStickConfig &config)
 {
@@ -47,7 +49,10 @@ bool MouseStick::Tick(double dt, int16_t *out_x, int16_t *out_y)
 	double vy = acc_y / dt;
 	acc_x = acc_y = 0.0;
 
-	const double a = config.smoothing;
+	// Smoothing is defined per 4 ms step and scaled to the real step length, so
+	// it behaves the same whether updates come from mouse input or the timer,
+	// and a stopped mouse recenters the stick quickly.
+	const double a = config.smoothing > 0.0 ? std::pow(config.smoothing, dt / MOUSE_STICK_SMOOTHING_STEP) : 0.0;
 	vel_x = a * vel_x + (1.0 - a) * vx;
 	vel_y = a * vel_y + (1.0 - a) * vy;
 

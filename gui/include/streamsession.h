@@ -241,7 +241,6 @@ class StreamSession : public QObject
 		int mouse_stick_buttons[MOUSE_STICK_BUTTON_COUNT];
 		void LoadMouseStickSettings(Settings *settings);
 		void MouseStickTick();
-		void SetMouseStickButton(Qt::MouseButton button, bool pressed);
 		bool dpad_regular;
 		bool dpad_regular_touch_switched;
 		uint dpad_touch_shortcut1;
@@ -390,6 +389,7 @@ class StreamSession : public QObject
 		void SetMouseStickActive(bool active);
 		void ToggleMouseStick() { SetMouseStickActive(!mouse_stick_active); }
 		void HandleMouseStickDelta(double dx, double dy);
+		void SetMouseStickButton(Qt::MouseButton button, bool pressed);
 #if CHIAKI_GUI_ENABLE_SPEEX
 		bool ProcessMicFrame(int16_t *echo_buf);
 #endif

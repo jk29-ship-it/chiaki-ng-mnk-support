@@ -955,11 +955,19 @@ void StreamSession::HandleMouseStickDelta(double dx, double dy)
 	if(!MouseStickActive())
 		return;
 	mouse_stick.AddDelta(dx, dy);
+	// Update right away while the mouse moves instead of waiting for the timer.
+	// The Windows timer only fires every ~15 ms, which adds lag and makes the
+	// stick output uneven. The timer still handles the stick returning to center.
+	MouseStickTick();
 }
 
 void StreamSession::MouseStickTick()
 {
-	double dt = mouse_stick_clock.nsecsElapsed() / 1e9;
+	const qint64 elapsed_ns = mouse_stick_clock.nsecsElapsed();
+	// too short a window gives a noisy velocity, wait for more counts
+	if(elapsed_ns < MOUSE_STICK_UPDATE_INTERVAL_MS * 1000000LL)
+		return;
+	double dt = elapsed_ns / 1e9;
 	mouse_stick_clock.restart();
 	int16_t x, y;
 	if(mouse_stick.Tick(dt, &x, &y))

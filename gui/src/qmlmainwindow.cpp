@@ -2812,6 +2812,11 @@ void QmlMainWindow::updateMouseStickCapture()
         RegisterRawInputDevices(&rid, 1, sizeof(rid));
         ClipCursor(nullptr);
 #endif
+        // raw input stops now, release buttons so none stays held in the game
+        if (session) {
+            for (Qt::MouseButton b : { Qt::LeftButton, Qt::RightButton, Qt::MiddleButton, Qt::BackButton, Qt::ForwardButton })
+                session->SetMouseStickButton(b, false);
+        }
         if (grab_input || !has_video || !settings->GetHideCursor())
             setCursor(Qt::ArrowCursor);
         qCInfo(chiakiGui) << "Mouse aim: mouse released";
@@ -2847,9 +2852,26 @@ bool QmlMainWindow::nativeEvent(const QByteArray &eventType, void *message, qint
         RAWINPUT raw = {};
         UINT size = sizeof(raw);
         if (GetRawInputData(reinterpret_cast<HRAWINPUT>(msg->lParam), RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER)) != static_cast<UINT>(-1)
-                && raw.header.dwType == RIM_TYPEMOUSE
-                && !(raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE))
-            session->HandleMouseStickDelta(raw.data.mouse.lLastX, raw.data.mouse.lLastY);
+                && raw.header.dwType == RIM_TYPEMOUSE) {
+            // Buttons come from raw input as well, so they work no matter how Qt
+            // routes the regular mouse messages while the cursor is captured.
+            static const struct { USHORT down, up; Qt::MouseButton button; } raw_buttons[] = {
+                { RI_MOUSE_BUTTON_1_DOWN, RI_MOUSE_BUTTON_1_UP, Qt::LeftButton },
+                { RI_MOUSE_BUTTON_2_DOWN, RI_MOUSE_BUTTON_2_UP, Qt::RightButton },
+                { RI_MOUSE_BUTTON_3_DOWN, RI_MOUSE_BUTTON_3_UP, Qt::MiddleButton },
+                { RI_MOUSE_BUTTON_4_DOWN, RI_MOUSE_BUTTON_4_UP, Qt::BackButton },
+                { RI_MOUSE_BUTTON_5_DOWN, RI_MOUSE_BUTTON_5_UP, Qt::ForwardButton },
+            };
+            const USHORT flags = raw.data.mouse.usButtonFlags;
+            for (const auto &b : raw_buttons) {
+                if (flags & b.down)
+                    session->SetMouseStickButton(b.button, true);
+                if (flags & b.up)
+                    session->SetMouseStickButton(b.button, false);
+            }
+            if (!(raw.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) && (raw.data.mouse.lLastX || raw.data.mouse.lLastY))
+                session->HandleMouseStickDelta(raw.data.mouse.lLastX, raw.data.mouse.lLastY);
+        }
     }
 #endif
     return QWindow::nativeEvent(eventType, message, result);
@@ -7802,6 +7824,11 @@ bool QmlMainWindow::event(QEvent *event)
         if (static_cast<QMouseEvent*>(event)->source() != Qt::MouseEventNotSynthesized)
             return true;
         if (session && !grab_input) {
+#if defined(Q_OS_WIN)
+            // buttons arrive through raw input while captured, avoid double presses
+            if (mouse_stick_capture && event->type() != QEvent::MouseMove)
+                return true;
+#endif
             if (event->type() == QEvent::MouseMove && mouse_stick_capture) {
 #if !defined(Q_OS_WIN)
                 // No raw input here: measure the offset from the window center and warp back
@@ -7827,6 +7854,9 @@ bool QmlMainWindow::event(QEvent *event)
     case QEvent::MouseButtonDblClick:
         // in mouse aim mode the second click of a fast double click is a normal press (e.g. shooting)
         if (session && !grab_input && session->MouseStickActive()) {
+#if defined(Q_OS_WIN)
+            if (!mouse_stick_capture)
+#endif
             session->HandleMousePressEvent(static_cast<QMouseEvent*>(event));
             return true;
         }
