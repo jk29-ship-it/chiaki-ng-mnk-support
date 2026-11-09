@@ -170,6 +170,98 @@ Window {
                 }
             }
 
+            Slider {
+                id: mouseYRatioSlider
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.rightMargin: 20
+                orientation: Qt.Vertical
+                from: 0.25
+                to: 2.0
+                Layout.preferredHeight: 100
+                padding: 10
+                stepSize: 0.05
+                value: Chiaki.settings.mouseStickYRatio
+                onMoved: Chiaki.settings.mouseStickYRatio = value
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+
+                Label {
+                    anchors {
+                        top: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: qsTr("Vertical") + " " + parent.value.toFixed(2)
+                }
+            }
+
+            Slider {
+                id: mouseDeadzoneSlider
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.rightMargin: 20
+                orientation: Qt.Vertical
+                from: 0.0
+                to: 0.5
+                Layout.preferredHeight: 100
+                padding: 10
+                stepSize: 0.01
+                value: Chiaki.settings.mouseStickDeadzone
+                onMoved: Chiaki.settings.mouseStickDeadzone = value
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+
+                Label {
+                    anchors {
+                        top: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: qsTr("Deadzone") + " " + parent.value.toFixed(2)
+                }
+            }
+
+            Slider {
+                id: mouseCurveSlider
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.rightMargin: 20
+                orientation: Qt.Vertical
+                from: 0.4
+                to: 2.0
+                Layout.preferredHeight: 100
+                padding: 10
+                stepSize: 0.05
+                value: Chiaki.settings.mouseStickExponent
+                onMoved: Chiaki.settings.mouseStickExponent = value
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+
+                Label {
+                    anchors {
+                        top: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: qsTr("Curve") + " " + parent.value.toFixed(2)
+                }
+            }
+
+            Slider {
+                id: mouseSmoothSlider
+                visible: Chiaki.settings.mouseStickEnabled
+                Layout.rightMargin: 20
+                orientation: Qt.Vertical
+                from: 0.0
+                to: 0.9
+                Layout.preferredHeight: 100
+                padding: 10
+                stepSize: 0.05
+                value: Chiaki.settings.mouseStickSmoothing
+                onMoved: Chiaki.settings.mouseStickSmoothing = value
+                Keys.onEscapePressed: streamMenuWindow.closeRequested()
+
+                Label {
+                    anchors {
+                        top: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    text: qsTr("Smooth") + " " + parent.value.toFixed(2)
+                }
+            }
+
             ToolSeparator {
                 Layout.leftMargin: -10
                 Layout.rightMargin: -10
